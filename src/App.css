@@ -17,5 +17,10 @@ h1 {
 }
 
 .searchButton {
-  margin-left: 10px;
+  margin-left: 20px;
+}
+
+.results {
+  margin-top: 20px;
+  margin-left: 20px;
 }
