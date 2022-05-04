@@ -20,7 +20,25 @@ h1 {
   margin-left: 20px;
 }
 
+.inputsContainer {
+  display: flex;
+  justify-content: space-around;
+}
+
+.resultsContainer {
+  display: flex;
+  justify-content: space-around;
+}
+
+.searchResults {
+  height: 25vh;
+}
+
 .results {
   margin-top: 20px;
   margin-left: 20px;
+}
+
+.disclaimer {
+  font-size: 11px;
 }
