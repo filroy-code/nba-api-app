@@ -144,12 +144,84 @@ function App() {
     fg3p:0,
 })
 
-React.useEffect(() => {setPlayersToCompare([playerOne, playerTwo])}, [playerOne, playerTwo])
+const [comparisonStats, setComparisonStats] = React.useState({
+  player:"",
+  season:0,
+  games_played:0,
+  mins:"",
+  pts:0,
+  reb:0,
+  ast:0,
+  blk:0,
+  stl:0,
+  tov:0,
+  fouls:0,
+  fga:0,
+  fgm:0,
+  fgp:0,
+  oreb:0,
+  fta:0,
+  ftm:0,
+  ftp:0,
+  fg3a:0,
+  fg3m:0,
+  fg3p:0,
+})
+
+function playerComparisonGreaterThan(comparisonStats, playerOne, playerTwo) {
+  let comparisonArray = {}
+  for (let stat in comparisonStats) {
+    if (comparisonStats[stat] > 0) {
+      comparisonArray[stat] = playerTwo[stat]}
+    else {comparisonArray[stat] = playerOne[stat]}
+  }
+  return (comparisonArray)
+}
+
+function calculateGraphBars(comparisonArray, comparisonStats) {
+  let graphValues = {};
+  for (let stat in comparisonStats) {
+    graphValues[stat] = (comparisonStats[stat] / comparisonArray[stat])
+  }
+  console.log(graphValues)
+  return graphValues
+}
+
+
+function playerComparisonObjectCreate(playerOne, playerTwo) {
+  return (
+    {games_played: (playerTwo.games_played - playerOne.games_played),
+    pts: (playerTwo.pts - playerOne.pts),
+    reb: (playerTwo.reb - playerOne.reb),
+    ast: (playerTwo.ast - playerOne.ast),
+    blk: (playerTwo.blk - playerOne.blk),
+    stl: (playerTwo.stl - playerOne.stl),
+    tov: (playerTwo.tov - playerOne.tov),
+    fouls: (playerTwo.fouls - playerOne.fouls),
+    fga: (playerTwo.fga - playerOne.fga),
+    fgm: (playerTwo.fgm - playerOne.fgm),
+    fgp: (playerTwo.fgp - playerOne.fgp),
+    oreb: (playerTwo.oreb - playerOne.oreb),
+    fta: (playerTwo.fta - playerOne.fta),
+    ftm: (playerTwo.ftm - playerOne.ftm),
+    ftp: (playerTwo.ftp - playerOne.ftp),
+    fg3a: (playerTwo.fg3a - playerOne.fg3a),
+    fg3m: (playerTwo.fg3m - playerOne.fg3m),
+    fg3p: (playerTwo.fg3p - playerOne.fg3p),
+    }
+  )
+}
+
+React.useEffect(() => {
+  setPlayersToCompare([playerOne, playerTwo]);
+  setComparisonStats(playerComparisonObjectCreate(playerOne, playerTwo))}, [playerOne, playerTwo])
  
+
+
   return (
     <div className="App">
       <h1>NBA Stats Comparison Tool</h1>
-      <button onClick={() => console.log(playersToCompare)}>Show Saved Players</button>
+      <button onClick={() => calculateGraphBars(playerComparisonGreaterThan(comparisonStats, playerOne, playerTwo), comparisonStats)}>Show Saved Players</button>
       <div className='inputsContainer'>
         <Inputs 
           submitHandler={submitHandler}
@@ -168,20 +240,20 @@ React.useEffect(() => {setPlayersToCompare([playerOne, playerTwo])}, [playerOne,
           selectPlayer={selectPlayerOne}
           selectYear={selectYearOne}
           player={playerOne}
-          submitted={playerOneFind}/> : null}
+          submitted={playerOneFind}/> : <div className='results' />}
         {submitted2 ? <Results 
           searchedPlayers={searchedPlayers2}
           selectPlayer={selectPlayerTwo}
           selectYear={selectYearTwo}
           player={playerTwo}
-          submitted={playerTwoFind}/> : null}
+          submitted={playerTwoFind}/> : <div className='results' />}
       </div>
       <div className='resultsContainer'>
-        {playerOneFind ? <PlayerStats player={playerOne} /> : null}
-        {playerTwoFind ? <PlayerStats player={playerTwo} /> : null}
+        {playerOneFind ? <PlayerStats player={playerOne} /> : <div className='playerStats' />}
+        {playerTwoFind ? <PlayerStats player={playerTwo} /> : <div className='playerStats' />}
       </div>
       <div className='graph'>
-        
+        {JSON.stringify(comparisonStats)}
       </div>
     </div>
   );
