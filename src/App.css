@@ -31,7 +31,7 @@ h1 {
 }
 
 .searchResults {
-  height: 25vh;
+  height: 8rem;
 }
 
 .results {
@@ -41,4 +41,11 @@ h1 {
 
 .disclaimer {
   font-size: 11px;
+  padding-bottom: 10px;
+}
+
+.playerList {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
