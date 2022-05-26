@@ -2,7 +2,7 @@ export default async function findPlayerStats(selectedPlayer, selectedYear) {
     //event.preventDefault();
     let response = await fetch(`https://www.balldontlie.io/api/v1/season_averages?player_ids[]=${selectedPlayer.id}&season=${selectedYear}`)
     let stats = await response.json();
-    return ({
+    if (stats.data[0]) {return ({
         player: selectedPlayer.name,
         season: stats.data[0].season,
         games_played: stats.data[0].games_played,
@@ -24,5 +24,5 @@ export default async function findPlayerStats(selectedPlayer, selectedYear) {
         fg3a: stats.data[0].fg3a,
         fg3m: stats.data[0].fg3m,
         fg3p: stats.data[0].fg3_pct,
-    })
+    })} else {return "No player data found for this year."}
 }

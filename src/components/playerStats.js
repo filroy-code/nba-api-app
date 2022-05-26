@@ -9,6 +9,8 @@ export default function PlayerStats(props) {
 
     let playerStatsDisplay = playerStatsArray.map(x => <p key={x}>{x}</p>)
 
+    if (playerStatsDisplay[0].key === "0: N") {playerStatsDisplay = "No player data found for this year."}
+
     return (
         <div className="playerStats">
             {playerStatsDisplay}

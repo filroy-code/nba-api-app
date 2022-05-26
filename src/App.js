@@ -4,11 +4,15 @@ import findPlayerStats from './components/findPlayerStats';
 import Inputs from './components/inputs';
 import Results from './components/results';
 import PlayerStats  from "./components/playerStats"
-// import BarChart from "./components/BarChart"
+import BarChart from "./components/BarChart"
 import React from 'react'
+import Logo from './images/nbalogo.png'
 
 
 function App() {
+
+  const isMounted = React.useRef(false);
+  const isMounted2 = React.useRef(false);
 
   document.title = "NBA Stats Comparison Tool"
 
@@ -24,25 +28,24 @@ function App() {
     event.preventDefault()
     let currentSearch = [];
     const playersArray = await (findListofPlayers(searchParams))
-    playersArray.forEach( async (player) => 
-        {let entry = await fetch(`https://www.balldontlie.io/api/v1/players/${player}`)
-        let result = await entry.json();
-        currentSearch.push(result)
-        })
+    for await (let playerResult of playersArray) {
+      let entry = await fetch(`https://www.balldontlie.io/api/v1/players/${playerResult}`)
+      let result = await entry.json()
+      currentSearch.push(result)
+    }
     toggleSubmitted(true)
     updateSearchedPlayers(currentSearch)
-    console.log(searchedPlayers)
   }
 
   async function submitHandler2(event) {
     event.preventDefault()
     let currentSearch = [];
     const playersArray = await (findListofPlayers(searchParams2))
-    playersArray.forEach( async (player) => 
-        {let entry = await fetch(`https://www.balldontlie.io/api/v1/players/${player}`)
-        let result = await entry.json();
-        currentSearch.push(result)
-        })
+    for await (let playerResult of playersArray) {
+      let entry = await fetch(`https://www.balldontlie.io/api/v1/players/${playerResult}`)
+      let result = await entry.json()
+      currentSearch.push(result)
+    }
     toggleSubmitted2(true)
     updateSearchedPlayers2(currentSearch)
   }
@@ -78,22 +81,33 @@ function App() {
   const [selectedPlayerOne, selectedPlayerOneUpdate] = React.useState({id: "", name: ""})
   const [playerOneFind, togglePlayerOneFind] = React.useState(false)
 
+React.useEffect(() => {
+  if (isMounted.current) {
+  findPlayerStats(selectedPlayerOne, selectedYearOne).then((res) => updatePlayerOne(res))} else {
+    isMounted.current = true
+  }
+  }, [selectedPlayerOne, selectedYearOne])
+
   async function selectPlayerOne(event) {
       selectedPlayerOneUpdate({id: event.target.value, name: event.target.alt})
-      updatePlayerOne(await findPlayerStats(selectedPlayerOne, selectedYearOne))
       togglePlayerOneFind(true)
-      console.log(playerOne)
   }
 
   //choosing second player to compare
   const [selectedPlayerTwo, selectedPlayerTwoUpdate] = React.useState({id: "", name: ""})
   const [playerTwoFind, togglePlayerTwoFind] = React.useState(false)
 
+  React.useEffect(() => {
+    if (isMounted2.current) {
+    findPlayerStats(selectedPlayerTwo, selectedYearTwo).then((res) => updatePlayerTwo(res))} else {
+      isMounted2.current = true
+    }
+    }, [selectedPlayerTwo, selectedYearTwo])
+  
+
   async function selectPlayerTwo(event) {
     selectedPlayerTwoUpdate({id: event.target.value, name: event.target.alt})
-    updatePlayerTwo(await findPlayerStats(selectedPlayerTwo, selectedYearTwo))
     togglePlayerTwoFind(true)
-    console.log(playerTwo)
   }
 
   const [playerOne, updatePlayerOne] = React.useState({
@@ -142,86 +156,68 @@ function App() {
     fg3a:0,
     fg3m:0,
     fg3p:0,
-})
+  })
 
-const [comparisonStats, setComparisonStats] = React.useState({
-  player:"",
-  season:0,
-  games_played:0,
-  mins:"",
-  pts:0,
-  reb:0,
-  ast:0,
-  blk:0,
-  stl:0,
-  tov:0,
-  fouls:0,
-  fga:0,
-  fgm:0,
-  fgp:0,
-  oreb:0,
-  fta:0,
-  ftm:0,
-  ftp:0,
-  fg3a:0,
-  fg3m:0,
-  fg3p:0,
-})
+  const [comparisonStats, setComparisonStats] = React.useState({
+    player:"",
+    season:0,
+    games_played:0,
+    mins:"",
+    pts:0,
+    reb:0,
+    ast:0,
+    blk:0,
+    stl:0,
+    tov:0,
+    fouls:0,
+    fga:0,
+    fgm:0,
+    fgp:0,
+    oreb:0,
+    fta:0,
+    ftm:0,
+    ftp:0,
+    fg3a:0,
+    fg3m:0,
+    fg3p:0,
+  })
 
-function playerComparisonGreaterThan(comparisonStats, playerOne, playerTwo) {
-  let comparisonArray = {}
-  for (let stat in comparisonStats) {
-    if (comparisonStats[stat] > 0) {
-      comparisonArray[stat] = playerTwo[stat]}
-    else {comparisonArray[stat] = playerOne[stat]}
+  function playerComparisonObjectCreate(playerOne, playerTwo) {
+    return (
+      [{stat: "games_played", "comparison": (playerTwo.games_played - playerOne.games_played), playerOne: playerOne.games_played, playerTwo: playerTwo.games_played},
+      {stat: "pts", "comparison": (playerTwo.pts - playerOne.pts), playerOne: playerOne.pts, playerTwo: playerTwo.pts},
+      {stat: "reb", "comparison": (playerTwo.reb - playerOne.reb), playerOne: playerOne.reb, playerTwo: playerTwo.reb},
+      {stat: "ast", "comparison": (playerTwo.ast - playerOne.ast), playerOne: playerOne.ast, playerTwo: playerTwo.ast},
+      {stat: "blk", "comparison": (playerTwo.blk - playerOne.blk), playerOne: playerOne.blk, playerTwo: playerTwo.blk},
+      {stat: "stl", "comparison": (playerTwo.stl - playerOne.stl), playerOne: playerOne.stl, playerTwo: playerTwo.stl},
+      {stat: "tov", "comparison": (playerTwo.tov - playerOne.tov), playerOne: playerOne.tov, playerTwo: playerTwo.tov},
+      {stat: "fouls", "comparison": (playerTwo.fouls - playerOne.fouls), playerOne: playerOne.fouls, playerTwo: playerTwo.fouls},
+      {stat: "fga", "comparison": (playerTwo.fga - playerOne.fga), playerOne: playerOne.fga, playerTwo: playerTwo.fga},
+      {stat: "fgm", "comparison": (playerTwo.fgm - playerOne.fgm), playerOne: playerOne.fgm, playerTwo: playerTwo.fgm},
+      {stat: "fgp", "comparison": (playerTwo.fgp - playerOne.fgp), playerOne: playerOne.fgp, playerTwo: playerTwo.fgp},
+      {stat: "oreb", "comparison": (playerTwo.oreb - playerOne.oreb), playerOne: playerOne.oreb, playerTwo: playerTwo.oreb},
+      {stat: "fta", "comparison": (playerTwo.fta - playerOne.fta), playerOne: playerOne.fta, playerTwo: playerTwo.fta},
+      {stat: "ftm", "comparison": (playerTwo.ftm - playerOne.ftm), playerOne: playerOne.ftm, playerTwo: playerTwo.ftm},
+      {stat: "ftp", "comparison": (playerTwo.ftp - playerOne.ftp), playerOne: playerOne.ftp, playerTwo: playerTwo.ftp},
+      {stat: "fg3a", "comparison": (playerTwo.fg3a - playerOne.fg3a), playerOne: playerOne.fg3a, playerTwo: playerTwo.fg3a},
+      {stat: "fg3m", "comparison": (playerTwo.fg3m - playerOne.fg3m), playerOne: playerOne.fg3m, playerTwo: playerTwo.fg3m},
+      {stat: "fg3p", "comparison": (playerTwo.fg3p - playerOne.fg3p), playerOne: playerOne.fg3p, playerTwo: playerTwo.fg3p},
+      ]
+    )
   }
-  return (comparisonArray)
-}
+const [graphMake, updateGraphMake] = React.useState(false)
 
-function calculateGraphBars(comparisonArray, comparisonStats) {
-  let graphValues = {};
-  for (let stat in comparisonStats) {
-    graphValues[stat] = (comparisonStats[stat] / comparisonArray[stat])
-  }
-  console.log(graphValues)
-  return graphValues
-}
-
-
-function playerComparisonObjectCreate(playerOne, playerTwo) {
-  return (
-    {games_played: (playerTwo.games_played - playerOne.games_played),
-    pts: (playerTwo.pts - playerOne.pts),
-    reb: (playerTwo.reb - playerOne.reb),
-    ast: (playerTwo.ast - playerOne.ast),
-    blk: (playerTwo.blk - playerOne.blk),
-    stl: (playerTwo.stl - playerOne.stl),
-    tov: (playerTwo.tov - playerOne.tov),
-    fouls: (playerTwo.fouls - playerOne.fouls),
-    fga: (playerTwo.fga - playerOne.fga),
-    fgm: (playerTwo.fgm - playerOne.fgm),
-    fgp: (playerTwo.fgp - playerOne.fgp),
-    oreb: (playerTwo.oreb - playerOne.oreb),
-    fta: (playerTwo.fta - playerOne.fta),
-    ftm: (playerTwo.ftm - playerOne.ftm),
-    ftp: (playerTwo.ftp - playerOne.ftp),
-    fg3a: (playerTwo.fg3a - playerOne.fg3a),
-    fg3m: (playerTwo.fg3m - playerOne.fg3m),
-    fg3p: (playerTwo.fg3p - playerOne.fg3p),
-    }
-  )
-}
-
-React.useEffect(() => {
-  setPlayersToCompare([playerOne, playerTwo]);
-  setComparisonStats(playerComparisonObjectCreate(playerOne, playerTwo))}, [playerOne, playerTwo])
+  React.useEffect(() => {
+    setPlayersToCompare([playerOne, playerTwo]);
+    setComparisonStats(playerComparisonObjectCreate(playerOne, playerTwo))}, [playerOne, playerTwo])
+  
+  React.useEffect((playersToCompare) => {if (playerOneFind && playerTwoFind) {updateGraphMake(true)}}, [playerOneFind, playerTwoFind, comparisonStats])
  
-
 
   return (
     <div className="App">
+      {/*<button onClick={() => {console.log(comparisonStats)}}>Click me!</button>*/}
       <h1>NBA Stats Comparison Tool</h1>
-      <button onClick={() => calculateGraphBars(playerComparisonGreaterThan(comparisonStats, playerOne, playerTwo), comparisonStats)}>Show Saved Players</button>
       <div className='inputsContainer'>
         <Inputs 
           submitHandler={submitHandler}
@@ -234,7 +230,7 @@ React.useEffect(() => {
           changeHandler={changeHandler2}
         />
       </div>
-      <div className='resultsContainer'>
+      <div className='queryContainer'>
         {submitted ? <Results 
           searchedPlayers={searchedPlayers}
           selectPlayer={selectPlayerOne}
@@ -248,12 +244,13 @@ React.useEffect(() => {
           player={playerTwo}
           submitted={playerTwoFind}/> : <div className='results' />}
       </div>
+      {submitted || submitted2 ? <hr></hr> : null}
       <div className='resultsContainer'>
-        {playerOneFind ? <PlayerStats player={playerOne} /> : <div className='playerStats' />}
-        {playerTwoFind ? <PlayerStats player={playerTwo} /> : <div className='playerStats' />}
-      </div>
-      <div className='graph'>
-        {JSON.stringify(comparisonStats)}
+        {graphMake === false ? (playerOneFind ? <PlayerStats player={playerOne} /> : <div className='playerStats' />) : <div className='playerStats' />}
+        <div>
+        {graphMake === true ? <BarChart compare={comparisonStats} /> : null}
+        </div>
+        {graphMake === false ? (playerTwoFind ? <PlayerStats player={playerTwo} /> : <div className='playerStats' />) : <div className='playerStats' />}
       </div>
     </div>
   );
